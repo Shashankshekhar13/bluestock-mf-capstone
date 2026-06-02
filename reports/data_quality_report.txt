@@ -1,0 +1,13 @@
+==================================================
+           DATA QUALITY REPORT: AMFI CODES        
+==================================================
+Fund Master file: 01_fund_master.csv
+NAV History file: 02_nav_history.csv
+--------------------------------------------------
+Unique AMFI codes in Fund Master: 40
+Unique AMFI codes in NAV History: 40
+--------------------------------------------------
+Number of codes matched: 40 (100.00%)
+Number of codes in Fund Master missing from NAV History: 0
+
+Success: All codes in Fund Master successfully match with NAV History!
