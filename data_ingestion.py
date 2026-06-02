@@ -9,8 +9,6 @@ def main():
     # Find all CSV files in the raw data directory
     csv_files = glob.glob(os.path.join(raw_data_dir, "*.csv"))
     
-    # Exclude files ending with '_raw.csv' to distinguish between downloaded live NAV and provided datasets (if necessary)
-    # But print all of them for complete coverage as required
     if not csv_files:
         print("No CSV files found in data/raw/ yet.")
         print("Please add the 10 CSV datasets to data/raw/ and run this script again.")
@@ -25,19 +23,18 @@ def main():
         print("=" * 80)
         
         try:
-            # Load CSV using pandas
+        
             df = pd.read_csv(file_path)
             
-            # Print shape (rows, columns)
+         
             print(f"Shape: {df.shape[0]} rows, {df.shape[1]} columns")
             print("-" * 50)
             
-            # Print data types of columns
+
             print("Data Types:")
             print(df.dtypes)
             print("-" * 50)
             
-            # Print head (first 5 rows)
             print("First 5 Rows:")
             print(df.head())
             print("\n")

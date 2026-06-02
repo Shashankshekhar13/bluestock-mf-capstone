@@ -1,9 +1,4 @@
-# %% [markdown]
-# # Day 1: EDA and Data Validation
-# This interactive script performs Exploratory Data Analysis (EDA) on `fund_master` 
-# and validates mutual fund AMFI codes against `nav_history`.
 
-# %%
 import os
 import glob
 import pandas as pd
