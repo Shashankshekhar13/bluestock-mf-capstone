@@ -10,11 +10,9 @@ def setup_windows_schedule(script_path):
     print("Detected OS: Windows. Using Windows Task Scheduler...")
     python_exe = sys.executable
     
-    # Format the command to execute
-    # Escape quotes inside the /tr command string
+
     cmd_to_run = f'"{python_exe}" "{script_path}"'
     
-    # schtasks command to run weekly on Mon, Tue, Wed, Thu, Fri at 8:00 PM (20:00)
     schtasks_cmd = [
         "schtasks", "/create", 
         "/tn", TASK_NAME, 
