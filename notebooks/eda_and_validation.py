@@ -5,10 +5,11 @@ import pandas as pd
 
 # %%
 # 1. Locate Datasets
-# Support running from either root folder or notebooks folder
-raw_dir = os.path.join("..", "data", "raw")
-if not os.path.exists(raw_dir):
-    raw_dir = os.path.join("data", "raw")
+script_dir = os.path.dirname(os.path.abspath(__file__))
+if os.path.basename(script_dir) == "notebooks":
+    raw_dir = os.path.join(script_dir, "..", "data", "raw")
+else:
+    raw_dir = os.path.join(script_dir, "data", "raw")
 
 print(f"Searching for datasets in: {os.path.abspath(raw_dir)}")
 
@@ -118,9 +119,10 @@ if fund_master_path and nav_history_path:
         print(report_text)
         
         # Determine reports output folder
-        reports_dir = os.path.join("..", "reports")
-        if not os.path.exists(reports_dir):
-            reports_dir = os.path.join("reports")
+        if os.path.basename(script_dir) == "notebooks":
+            reports_dir = os.path.join(script_dir, "..", "reports")
+        else:
+            reports_dir = os.path.join(script_dir, "reports")
             
         os.makedirs(reports_dir, exist_ok=True)
         report_file_path = os.path.join(reports_dir, "data_quality_report.txt")

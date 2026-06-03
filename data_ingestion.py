@@ -3,7 +3,8 @@ import glob
 import pandas as pd
 
 def main():
-    raw_data_dir = os.path.join("data", "raw")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    raw_data_dir = os.path.join(script_dir, "data", "raw")
     print(f"Scanning for CSV datasets in: {raw_data_dir}\n")
     
     # Find all CSV files in the raw data directory

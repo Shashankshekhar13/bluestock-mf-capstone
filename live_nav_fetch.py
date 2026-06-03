@@ -40,8 +40,10 @@ def fetch_and_save_nav(scheme_code, scheme_name, max_retries=5, backoff_factor=3
             # Reorder columns for clean layout
             df = df[['scheme_code', 'scheme_name', 'date', 'nav']]
             
-            # Save to csv inside data/raw
-            output_path = os.path.join("data", "raw", f"{scheme_code}_raw.csv")
+            # Save to csv inside data/raw (absolute path resolution relative to script)
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            output_dir = os.path.join(script_dir, "data", "raw")
+            output_path = os.path.join(output_dir, f"{scheme_code}_raw.csv")
             df.to_csv(output_path, index=False)
             print(f"Successfully saved {len(df)} records to {output_path}")
             return True
@@ -68,8 +70,10 @@ def fetch_and_save_nav(scheme_code, scheme_name, max_retries=5, backoff_factor=3
     return False
 
 def main():
-    # Ensure directory exists
-    os.makedirs(os.path.join("data", "raw"), exist_ok=True)
+    # Ensure directory exists relative to script location
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    output_dir = os.path.join(script_dir, "data", "raw")
+    os.makedirs(output_dir, exist_ok=True)
     
     success_count = 0
     for code, name in SCHEMES.items():
