@@ -1,7 +1,6 @@
--- Enable foreign key support
+
 PRAGMA foreign_keys = ON;
 
--- Drop tables if they exist to start fresh
 DROP TABLE IF EXISTS fact_portfolio_holdings;
 DROP TABLE IF EXISTS fact_benchmark_indices;
 DROP TABLE IF EXISTS fact_transactions;

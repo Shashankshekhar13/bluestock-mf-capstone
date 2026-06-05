@@ -1,10 +1,4 @@
--- ==============================================================================
--- Bluestock Mutual Fund Analytical SQL Queries
--- Day 2 Deliverable
--- ==============================================================================
 
--- 1. Top 5 funds by AUM
--- Retrieves the top 5 mutual fund schemes ranked by their latest AUM.
 SELECT 
     scheme_name, 
     amfi_code, 
@@ -15,8 +9,6 @@ ORDER BY aum_crore DESC
 LIMIT 5;
 
 
--- 2. Average NAV per month for each mutual fund
--- Joins NAV history with date dimensions to get the average NAV of each fund grouped by year and month.
 SELECT 
     f.scheme_name, 
     f.amfi_code, 
@@ -30,8 +22,6 @@ GROUP BY f.amfi_code, d.year, d.month
 ORDER BY f.scheme_name, d.year, d.month;
 
 
--- 3. SIP YoY Inflow Growth
--- Compares monthly SIP inflows with inflows from the same month of the previous year to show YoY growth.
 SELECT 
     t1.month AS current_month,
     ROUND(t1.sip_inflow_crore, 2) AS current_inflow_crore,
@@ -46,8 +36,6 @@ LEFT JOIN fact_monthly_sip_inflows t2
 ORDER BY current_month;
 
 
--- 4. Transactions by State
--- Summarizes transactions count, average transaction value, and total transaction amount by state.
 SELECT 
     state, 
     COUNT(*) AS total_transactions, 
@@ -58,8 +46,7 @@ GROUP BY state
 ORDER BY total_transaction_amount_inr DESC;
 
 
--- 5. Mutual Funds with Expense Ratio < 1%
--- Filters all funds having a low expense ratio (under 1.0%).
+
 SELECT 
     amfi_code, 
     scheme_name, 
@@ -70,8 +57,7 @@ WHERE expense_ratio_pct < 1.0
 ORDER BY expense_ratio_pct ASC;
 
 
--- 6. Top 5 Sectors by Portfolio Weight
--- Aggregates sector weightings across all portfolios to identify the most heavily represented industries.
+
 SELECT 
     sector, 
     ROUND(SUM(weight_pct), 2) AS total_weight_pct,
@@ -83,8 +69,6 @@ ORDER BY total_weight_pct DESC
 LIMIT 5;
 
 
--- 7. Transactions by KYC Status and Transaction Type
--- Analyzes transaction volumes and counts split by user KYC status and the transaction vehicle.
 SELECT 
     kyc_status, 
     transaction_type, 
@@ -95,8 +79,6 @@ GROUP BY kyc_status, transaction_type
 ORDER BY kyc_status, total_amount_inr DESC;
 
 
--- 8. Monthly NAV Volatility
--- Calculates monthly average NAV, absolute price range (max - min), and volatility (variance of NAV) for each fund.
 SELECT 
     f.scheme_name, 
     f.amfi_code, 
@@ -112,8 +94,7 @@ GROUP BY f.amfi_code, d.year, d.month
 ORDER BY f.scheme_name, d.year, d.month;
 
 
--- 9. Fund Performance vs Benchmark Index (2025 Calendar Year Returns)
--- Maps fund benchmarks to raw benchmark close values and compares their calendar returns for 2025.
+
 WITH fund_returns AS (
     SELECT 
         n.amfi_code,
@@ -163,8 +144,6 @@ WHERE bm.mapped_index IS NOT NULL
 ORDER BY fund_return_2025_pct DESC;
 
 
--- 10. AUM Growth and Comparison by Fund House Over Time
--- Summarizes total AUM growth rate and absolute growth (in crores) for each fund house.
 SELECT 
     fund_house,
     MIN(date) AS start_date,
