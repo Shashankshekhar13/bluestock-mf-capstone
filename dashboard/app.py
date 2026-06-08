@@ -9,15 +9,15 @@ import streamlit as st
 # Configure Streamlit page layout
 st.set_page_config(
     page_title="Bluestock Mutual Fund Capstone Dashboard",
-    page_icon="",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # Connect to database
-db_path = '../bluestock_mf.db'
+db_path = 'bluestock_mf.db'
 if not os.path.exists(db_path):
-    db_path = 'bluestock_mf.db'
+    db_path = '../bluestock_mf.db'
 
 @st.cache_resource
 def get_connection():
@@ -25,27 +25,54 @@ def get_connection():
 
 conn = get_connection()
 
+# Standard AMC name mapping to shorten names in visual tables and charts
+amc_mapping = {
+    'SBI Mutual Fund': 'SBI MF',
+    'ICICI Prudential Mutual Fund': 'ICICI Pru MF',
+    'ICICI Prudential MF': 'ICICI Pru MF',
+    'HDFC Mutual Fund': 'HDFC MF',
+    'Nippon India Mutual Fund': 'Nippon India MF',
+    'Nippon India MF': 'Nippon India MF',
+    'Kotak Mahindra Mutual Fund': 'Kotak MF',
+    'Kotak Mahindra MF': 'Kotak MF',
+    'Aditya Birla Sun Life Mutual Fund': 'Aditya Birla MF',
+    'Aditya Birla Sun Life MF': 'Aditya Birla MF',
+    'UTI Mutual Fund': 'UTI MF',
+    'Axis Mutual Fund': 'Axis MF',
+    'Mirae Asset Mutual Fund': 'Mirae Asset MF',
+    'Mirae Asset MF': 'Mirae Asset MF',
+    'DSP Mutual Fund': 'DSP MF'
+}
+
 # Premium CSS customization
 st.markdown("""
 <style>
     .kpi-card {
         background-color: #ffffff;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #cbd5e1;
         border-radius: 8px;
-        padding: 20px;
+        padding: 18px;
         text-align: center;
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        margin-bottom: 12px;
     }
+    .kpi-card-navy { border-top: 4px solid #1e3a8a; }
+    .kpi-card-teal { border-top: 4px solid #0d8a72; }
+    .kpi-card-coral { border-top: 4px solid #e66f50; }
+    .kpi-card-gold { border-top: 4px solid #e6ad12; }
+    
     .kpi-title {
         color: #64748b;
-        font-size: 0.9em;
-        font-weight: 600;
-        margin-bottom: 5px;
+        font-size: 0.85em;
+        font-weight: 700;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     .kpi-value {
-        color: #1e3a8a;
-        font-size: 1.8em;
+        font-size: 1.55em;
         font-weight: 700;
+        line-height: 1.2;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -70,13 +97,13 @@ with tab1:
     # KPI Cards
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.markdown('<div class="kpi-card"><div class="kpi-title">TOTAL INDUSTRY AUM</div><div class="kpi-value" style="color:#1e3a8a;">₹81.00L Cr</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="kpi-card kpi-card-navy"><div class="kpi-title">Total AUM (Industry)</div><div class="kpi-value" style="color:#1e3a8a;">₹81.00L Cr</div></div>', unsafe_allow_html=True)
     with col2:
-        st.markdown('<div class="kpi-card"><div class="kpi-title">MONTHLY SIP INFLOW (DEC 25)</div><div class="kpi-value" style="color:#0d8a72;">₹31,002 Cr</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="kpi-card kpi-card-teal"><div class="kpi-title">SIP Inflow (Dec 25)</div><div class="kpi-value" style="color:#0d8a72;">₹31,002 Cr</div></div>', unsafe_allow_html=True)
     with col3:
-        st.markdown('<div class="kpi-card"><div class="kpi-title">TOTAL FOLIO COUNT</div><div class="kpi-value" style="color:#e66f50;">26.12 Cr</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="kpi-card kpi-card-coral"><div class="kpi-title">Total Folio Count</div><div class="kpi-value" style="color:#e66f50;">26.12 Cr</div></div>', unsafe_allow_html=True)
     with col4:
-        st.markdown('<div class="kpi-card"><div class="kpi-title">ACTIVE SCHEMES</div><div class="kpi-value" style="color:#e6ad12;">1,908</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="kpi-card kpi-card-gold"><div class="kpi-title">Active Schemes</div><div class="kpi-value" style="color:#e6ad12;">1,908</div></div>', unsafe_allow_html=True)
         
     st.markdown("---")
     
@@ -102,6 +129,8 @@ with tab1:
             WHERE date = '2025-12-31' 
             ORDER BY aum_lakh_crore DESC
         """, conn)
+        df_aum['fund_house'] = df_aum['fund_house'].replace(amc_mapping)
+        
         fig_bar = px.bar(
             df_aum, x='aum_lakh_crore', y='fund_house', orientation='h',
             title="Assets Under Management (AUM) by AMC (Dec 2025)",
@@ -123,6 +152,19 @@ with tab2:
         scorecard_path = '../reports/fund_scorecard.csv'
     df_score = pd.read_csv(scorecard_path)
     
+    # Page 2 KPI Cards
+    p2_col1, p2_col2, p2_col3, p2_col4 = st.columns(4)
+    with p2_col1:
+        st.markdown('<div class="kpi-card kpi-card-navy"><div class="kpi-title">Top Ranked Fund</div><div class="kpi-value" style="color:#1e3a8a; font-size:1.3em;">Mirae Asset Large Cap</div></div>', unsafe_allow_html=True)
+    with p2_col2:
+        st.markdown('<div class="kpi-card kpi-card-teal"><div class="kpi-title">Best 3yr Return</div><div class="kpi-value" style="color:#0d8a72; font-size:1.3em;">35.10% (Axis Mid)</div></div>', unsafe_allow_html=True)
+    with p2_col3:
+        st.markdown('<div class="kpi-card kpi-card-coral"><div class="kpi-title">Highest Sharpe Ratio</div><div class="kpi-value" style="color:#e66f50; font-size:1.3em;">1.07 (Mirae Lg)</div></div>', unsafe_allow_html=True)
+    with p2_col4:
+        st.markdown('<div class="kpi-card kpi-card-gold"><div class="kpi-title">Average Expense Ratio</div><div class="kpi-value" style="color:#e6ad12; font-size:1.3em;">1.18%</div></div>', unsafe_allow_html=True)
+        
+    st.markdown("---")
+    
     # Top Slicers
     s_col1, s_col2, s_col3 = st.columns(3)
     with s_col1:
@@ -132,7 +174,6 @@ with tab2:
         cat_list = ["All"] + sorted(list(df_score['category'].unique()))
         selected_cat = st.selectbox("Slicer: Category", cat_list)
     with s_col3:
-        # Determine plan dynamically
         plan_list = ["All", "Regular", "Direct"]
         selected_plan = st.selectbox("Slicer: Plan", plan_list)
         
@@ -145,8 +186,6 @@ with tab2:
     if selected_plan != "All":
         df_score_filtered = df_score_filtered[df_score_filtered['scheme_name'].str.contains(selected_plan, case=False)]
         
-    st.markdown("---")
-    
     # Scatter return vs risk
     df_perf_raw = pd.read_sql_query("""
         SELECT f.scheme_name, f.category, p.return_3yr_pct, p.std_dev_ann_pct, p.aum_crore
@@ -163,7 +202,7 @@ with tab2:
     if selected_plan != "All":
         df_perf_filtered = df_perf_filtered[df_perf_filtered['scheme_name'].str.contains(selected_plan, case=False)]
         
-    pc1, pc2 = st.columns([1.5, 1.0])
+    pc1, pc2 = st.columns([1.3, 1.0])
     
     with pc1:
         fig_scatter = px.scatter(
@@ -226,13 +265,42 @@ with tab2:
             
     # Full Scorecard Table
     st.subheader("Sortable Fund Scorecard Table")
-    st.dataframe(df_score_filtered, use_container_width=True)
+    
+    # Create clean display table with shortened names
+    df_score_display = df_score_filtered.copy()
+    for amc, short_amc in amc_mapping.items():
+        df_score_display['scheme_name'] = df_score_display['scheme_name'].str.replace(amc, short_amc, regex=False)
+    df_score_display['scheme_name'] = df_score_display['scheme_name'].str.replace(' - Growth - Direct Plan', ' (Dir)', regex=False)
+    df_score_display['scheme_name'] = df_score_display['scheme_name'].str.replace(' - Growth - Regular Plan', ' (Reg)', regex=False)
+    df_score_display['scheme_name'] = df_score_display['scheme_name'].str.replace(' - Direct Plan - Growth Option', ' (Dir)', regex=False)
+    df_score_display['scheme_name'] = df_score_display['scheme_name'].str.replace(' - Regular Plan - Growth Option', ' (Reg)', regex=False)
+    df_score_display['scheme_name'] = df_score_display['scheme_name'].str.replace(' - Growth Option - Direct Plan', ' (Dir)', regex=False)
+    df_score_display['scheme_name'] = df_score_display['scheme_name'].str.replace(' - Growth Option - Regular Plan', ' (Reg)', regex=False)
+    df_score_display['scheme_name'] = df_score_display['scheme_name'].str.replace(' - Direct Plan', ' (Dir)', regex=False)
+    df_score_display['scheme_name'] = df_score_display['scheme_name'].str.replace(' - Regular Plan', ' (Reg)', regex=False)
+    df_score_display['scheme_name'] = df_score_display['scheme_name'].str.replace(' Fund', ' Fnd', regex=False)
+    df_score_display['scheme_name'] = df_score_display['scheme_name'].str.replace(' Plan', ' Pln', regex=False)
+    
+    st.dataframe(df_score_display, use_container_width=True)
 
 # ==========================================
 # PAGE 3: Investor Analytics
 # ==========================================
 with tab3:
     st.header("Investor Demographics & Transaction Volumes")
+    
+    # Page 3 KPI Cards
+    p3_col1, p3_col2, p3_col3, p3_col4 = st.columns(4)
+    with p3_col1:
+        st.markdown('<div class="kpi-card kpi-card-navy"><div class="kpi-title">Retail Inflows (SIP)</div><div class="kpi-value" style="color:#1e3a8a;">65.2% (T30)</div></div>', unsafe_allow_html=True)
+    with p3_col2:
+        st.markdown('<div class="kpi-card kpi-card-teal"><div class="kpi-title">Peak Age Demographic</div><div class="kpi-value" style="color:#0d8a72;">26-35 Years (34.8%)</div></div>', unsafe_allow_html=True)
+    with p3_col3:
+        st.markdown('<div class="kpi-card kpi-card-coral"><div class="kpi-title">Average Transaction Size</div><div class="kpi-value" style="color:#e66f50;">₹4,250 (SIP)</div></div>', unsafe_allow_html=True)
+    with p3_col4:
+        st.markdown('<div class="kpi-card kpi-card-gold"><div class="kpi-title">Active Transacting States</div><div class="kpi-value" style="color:#e6ad12;">28 States</div></div>', unsafe_allow_html=True)
+        
+    st.markdown("---")
     
     # Demographics Slicers
     is_col1, is_col2, is_col3 = st.columns(3)
@@ -249,8 +317,6 @@ with tab3:
         tier_list = ["All"] + sorted(list(df_tiers['city_tier'].dropna().unique()))
         selected_tier = st.selectbox("Slicer: City Tier", tier_list)
         
-    st.markdown("---")
-    
     # Query Transaction data with filters applied
     query_txn = "SELECT state, age_group, city_tier, transaction_type, amount_inr, transaction_date FROM fact_transactions WHERE 1=1"
     params = []
@@ -319,6 +385,19 @@ with tab3:
 with tab4:
     st.header("SIP & Market Linkage")
     
+    # Page 4 KPI Cards
+    p4_col1, p4_col2, p4_col3, p4_col4 = st.columns(4)
+    with p4_col1:
+        st.markdown('<div class="kpi-card kpi-card-navy"><div class="kpi-title">YoY SIP Growth</div><div class="kpi-value" style="color:#1e3a8a;">+42.5% (FY25)</div></div>', unsafe_allow_html=True)
+    with p4_col2:
+        st.markdown('<div class="kpi-card kpi-card-teal"><div class="kpi-title">All-Time High SIP Month</div><div class="kpi-value" style="color:#0d8a72; font-size:1.35em;">Dec 2025 (₹31,002 Cr)</div></div>', unsafe_allow_html=True)
+    with p4_col3:
+        st.markdown('<div class="kpi-card kpi-card-coral"><div class="kpi-title">Correlation (SIP vs Nifty)</div><div class="kpi-value" style="color:#e66f50;">0.94 (Strong Link)</div></div>', unsafe_allow_html=True)
+    with p4_col4:
+        st.markdown('<div class="kpi-card kpi-card-gold"><div class="kpi-title">Nifty Peak in Period</div><div class="kpi-value" style="color:#e6ad12;">27,798 (March 24)</div></div>', unsafe_allow_html=True)
+        
+    st.markdown("---")
+    
     tc1, tc2 = st.columns(2)
     
     with tc1:
@@ -367,6 +446,14 @@ with tab4:
         # Heatmap
         df_cat_heatmap = pd.read_sql_query("SELECT month, category, net_inflow_crore FROM fact_category_inflows ORDER BY month", conn)
         df_pivot_heatmap = df_cat_heatmap.pivot(index='category', columns='month', values='net_inflow_crore')
+        
+        # Shorten categories on heatmap y-axis matching reports
+        df_pivot_heatmap = df_pivot_heatmap.rename(index={
+            'Sectoral/Thematic': 'Sectoral',
+            'Large & Mid Cap': 'Large & Mid',
+            'Value/Contra': 'Value',
+            'Short Duration': 'Short Dur'
+        })
         
         fig_heat = px.imshow(
             df_pivot_heatmap,
