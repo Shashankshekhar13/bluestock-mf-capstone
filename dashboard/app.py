@@ -9,7 +9,7 @@ import streamlit as st
 # Configure Streamlit page layout
 st.set_page_config(
     page_title="Bluestock Mutual Fund Capstone Dashboard",
-    page_icon="📊",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -50,15 +50,15 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("📊 Bluestock Mutual Fund Executive Dashboard")
+st.title(" Bluestock Mutual Fund Executive Dashboard")
 st.markdown("Interactive Fund Analytics, Investor Demographics, and Performance Scorecard (Day 5 Work)")
 
 # Set up tabs for the 4 pages
 tab1, tab2, tab3, tab4 = st.tabs([
-    "📈 Industry Overview", 
-    "🏆 Fund Performance", 
-    "👥 Investor Analytics", 
-    "⚡ SIP & Market Trends"
+    " Industry Overview", 
+    " Fund Performance", 
+    " Investor Analytics", 
+    " SIP & Market Trends"
 ])
 
 # ==========================================
