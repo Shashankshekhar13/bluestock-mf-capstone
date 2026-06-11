@@ -9,7 +9,7 @@ import streamlit as st
 # Configure Streamlit page layout
 st.set_page_config(
     page_title="Bluestock Mutual Fund Capstone Dashboard",
-    page_icon="📊",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -78,7 +78,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title(" Bluestock Mutual Fund Executive Dashboard")
-st.markdown("Interactive Fund Analytics, Investor Demographics, and Performance Scorecard (Day 5 Work)")
+st.markdown("Interactive Fund Analytics, Investor Demographics, and Performance Scorecard")
 
 # Set up tabs for the 4 pages
 tab1, tab2, tab3, tab4 = st.tabs([
@@ -434,8 +434,8 @@ with tab4:
         fig_dual.update_layout(
             title=dict(text="Monthly SIP Inflows vs Nifty 50 Performance", font=dict(size=14, color='#1e3a8a')),
             xaxis=dict(title="Month (YYYY-MM)"),
-            yaxis1=dict(title="SIP Inflow (₹ Crore)", titlefont=dict(color="#1e3a8a"), tickfont=dict(color="#1e3a8a")),
-            yaxis2=dict(title="Nifty 50 Index Level", titlefont=dict(color="#e66f50"), tickfont=dict(color="#e66f50"), overlaying='y', side='right'),
+            yaxis=dict(title=dict(text="SIP Inflow (₹ Crore)", font=dict(color="#1e3a8a")), tickfont=dict(color="#1e3a8a")),
+            yaxis2=dict(title=dict(text="Nifty 50 Index Level", font=dict(color="#e66f50")), tickfont=dict(color="#e66f50"), overlaying='y', side='right'),
             template="plotly_white",
             legend=dict(orientation="h", y=-0.2, x=0.2)
         )
@@ -482,8 +482,3 @@ with tab4:
     )
     fig_fy25.update_layout(template="plotly_white")
     st.plotly_chart(fig_fy25, use_container_width=True)
-
-st.sidebar.title("Dashboard Options")
-st.sidebar.info("Designed for Bluestock Mutual Fund Capstone Project Day 5 work.")
-st.sidebar.markdown("**Author:** Shashank Shekkar")
-st.sidebar.success("Database Status: Connected")
