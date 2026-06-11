@@ -33,8 +33,6 @@ bluestock_mf_capstone/
 │   ├── compute_metrics.py         # Sharpe, HHI, and Value at Risk engine
 │   ├── email_report_generator.py  # Weekly responsive HTML generator
 │   ├── etl_pipeline.py            # Automated master ETL pipeline logic
-│   ├── generate_pdf.py            # ReportLab PDF 16+ page compiler (saves to artifacts)
-│   ├── generate_pptx.py           # Slide deck 12-slide widescreen compiler (saves to artifacts)
 │   ├── live_nav_fetch.py          # Daily API NAV fetch script
 │   └── recommender.py             # CLI-based fund recommendation engine
 ├── sql/
