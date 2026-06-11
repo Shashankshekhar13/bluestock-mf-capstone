@@ -15,9 +15,14 @@ st.set_page_config(
 )
 
 # Connect to database
-db_path = 'bluestock_mf.db'
+db_path = 'data/db/bluestock_mf.db'
+if not os.path.exists(db_path):
+    db_path = '../data/db/bluestock_mf.db'
+if not os.path.exists(db_path):
+    db_path = 'bluestock_mf.db'
 if not os.path.exists(db_path):
     db_path = '../bluestock_mf.db'
+
 
 @st.cache_resource
 def get_connection():
@@ -80,12 +85,14 @@ st.markdown("""
 st.title(" Bluestock Mutual Fund Executive Dashboard")
 st.markdown("Interactive Fund Analytics, Investor Demographics, and Performance Scorecard")
 
-# Set up tabs for the 4 pages
-tab1, tab2, tab3, tab4 = st.tabs([
+# Set up tabs for the 6 pages
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     " Industry Overview", 
     " Fund Performance", 
     " Investor Analytics", 
-    " SIP & Market Trends"
+    " SIP & Market Trends",
+    " Monte Carlo Simulation (B3)",
+    " Portfolio Optimization (B4)"
 ])
 
 # ==========================================
@@ -482,3 +489,351 @@ with tab4:
     )
     fig_fy25.update_layout(template="plotly_white")
     st.plotly_chart(fig_fy25, use_container_width=True)
+
+# ==========================================
+# PAGE 5: Monte Carlo Simulation (B3)
+# ==========================================
+with tab5:
+    st.header("📈 Monte Carlo NAV Growth Simulation")
+    st.markdown("""
+    This simulator models the future NAV of a chosen mutual fund over a 5-year horizon (1,260 trading days) using **Geometric Brownian Motion (GBM)**.
+    The simulation is based on the fund's historical daily return volatility and mean.
+    
+    $$dS_t = \\mu S_t dt + \\sigma S_t dW_t$$
+    """)
+    
+    # Selection of Fund
+    mc_fund_name = st.selectbox("Select Fund for Simulation:", df_score['scheme_name'].tolist(), key="mc_fund_sel")
+    
+    # Query NAV history for the selected fund
+    mc_code = df_score[df_score['scheme_name'] == mc_fund_name]['amfi_code'].values[0]
+    df_mc_nav = pd.read_sql_query(f"""
+        SELECT date, nav FROM fact_nav WHERE amfi_code = {mc_code} ORDER BY date
+    """, conn)
+    
+    if len(df_mc_nav) < 30:
+        st.warning("Insufficient historical NAV data to perform Monte Carlo simulation.")
+    else:
+        df_mc_nav['date'] = pd.to_datetime(df_mc_nav['date'])
+        df_mc_nav = df_mc_nav.sort_values('date')
+        
+        # Calculate daily returns
+        df_mc_nav['daily_return'] = df_mc_nav['nav'].pct_change()
+        returns = df_mc_nav['daily_return'].dropna()
+        
+        # Parameters computation
+        mu_daily = returns.mean()
+        sigma_daily = returns.std()
+        
+        # Annualized parameters
+        mu_ann = mu_daily * 252
+        sigma_ann = sigma_daily * np.sqrt(252)
+        
+        # Controls
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            initial_investment = st.number_input("Initial Investment (INR)", min_value=1000, max_value=10000000, value=100000, step=5000, key="mc_inv")
+        with c2:
+            num_simulations = st.slider("Number of Simulation Paths", min_value=100, max_value=2000, value=1000, step=100, key="mc_sims")
+        with c3:
+            horizon_years = st.slider("Simulation Horizon (Years)", min_value=1, max_value=5, value=5, step=1, key="mc_years")
+            
+        trading_days = int(horizon_years * 252)
+        dt = 1 / 252
+        
+        # Run Simulation
+        np.random.seed(42)  # For reproducible results
+        
+        drift = (mu_ann - 0.5 * (sigma_ann ** 2)) * dt
+        shock = sigma_ann * np.sqrt(dt)
+        
+        # Z is (trading_days, num_simulations)
+        Z = np.random.normal(0, 1, size=(trading_days, num_simulations))
+        daily_growth_factors = np.exp(drift + shock * Z)
+        
+        # Cumulative product over time
+        paths = np.zeros((trading_days + 1, num_simulations))
+        paths[0, :] = initial_investment
+        for t in range(1, trading_days + 1):
+            paths[t, :] = paths[t - 1, :] * daily_growth_factors[t - 1, :]
+            
+        # Get percentiles
+        p5 = np.percentile(paths, 5, axis=1)
+        p50 = np.percentile(paths, 50, axis=1)
+        p95 = np.percentile(paths, 95, axis=1)
+        
+        # Timeline
+        last_date = df_mc_nav['date'].max()
+        future_dates = pd.date_range(start=last_date, periods=trading_days + 1, freq='B')
+        
+        # Create simulation dataframe for plotting
+        df_sim = pd.DataFrame({
+            'Date': future_dates,
+            'P5': p5,
+            'Median (P50)': p50,
+            'P95': p95
+        })
+        
+        # Add sample paths
+        sample_path_indices = np.random.choice(num_simulations, size=min(5, num_simulations), replace=False)
+        for i, idx in enumerate(sample_path_indices):
+            df_sim[f'Path {i+1}'] = paths[:, idx]
+            
+        # Plotly chart
+        fig_mc = go.Figure()
+        
+        # Add shading between P5 and P95
+        fig_mc.add_trace(go.Scatter(
+            x=df_sim['Date'].tolist() + df_sim['Date'].tolist()[::-1],
+            y=df_sim['P95'].tolist() + df_sim['P5'].tolist()[::-1],
+            fill='toself',
+            fillcolor='rgba(147, 197, 253, 0.2)',
+            line=dict(color='rgba(255,255,255,0)'),
+            name='90% Uncertainty Band',
+            hoverinfo='skip'
+        ))
+        
+        # Add Median path
+        fig_mc.add_trace(go.Scatter(
+            x=df_sim['Date'], y=df_sim['Median (P50)'],
+            line=dict(color='#1e3a8a', width=3),
+            name='Median Path (50th Percentile)'
+        ))
+        
+        # Add P95 path
+        fig_mc.add_trace(go.Scatter(
+            x=df_sim['Date'], y=df_sim['P95'],
+            line=dict(color='#0d8a72', width=1.5, dash='dash'),
+            name='Optimistic Path (95th Percentile)'
+        ))
+        
+        # Add P5 path
+        fig_mc.add_trace(go.Scatter(
+            x=df_sim['Date'], y=df_sim['P5'],
+            line=dict(color='#e66f50', width=1.5, dash='dash'),
+            name='Pessimistic Path (5th Percentile)'
+        ))
+        
+        # Add sample paths in gray
+        for i in range(min(5, num_simulations)):
+            fig_mc.add_trace(go.Scatter(
+                x=df_sim['Date'], y=df_sim[f'Path {i+1}'],
+                line=dict(color='#94a3b8', width=0.8),
+                name=f'Sample Scenario {i+1}',
+                showlegend=False
+            ))
+            
+        fig_mc.update_layout(
+            title=dict(text=f"5-Year Monte Carlo Projection for {mc_fund_name.split(' - ')[0]}", font=dict(size=14, color='#1e3a8a')),
+            xaxis=dict(title="Timeline"),
+            yaxis=dict(title="Investment Value (INR)"),
+            template="plotly_white",
+            legend=dict(orientation="h", y=-0.2, x=0.0)
+        )
+        st.plotly_chart(fig_mc, use_container_width=True)
+        
+        # Summary details
+        final_p5 = p5[-1]
+        final_p50 = p50[-1]
+        final_p95 = p95[-1]
+        
+        c_kpi1, c_kpi2, c_kpi3, c_kpi4 = st.columns(4)
+        with c_kpi1:
+            st.metric("Drift (Annualised Return)", f"{mu_ann * 100:.2f}%")
+        with c_kpi2:
+            st.metric("Volatility (Annualised)", f"{sigma_ann * 100:.2f}%")
+        with c_kpi3:
+            gain_loss_ratio = (final_p50 / initial_investment - 1) * 100
+            st.metric("Expected Return (Median)", f"₹{final_p50:,.2f}", f"{gain_loss_ratio:+.2f}%")
+        with c_kpi4:
+            prob_loss = np.mean(paths[-1, :] < initial_investment) * 100
+            st.metric("Probability of Loss", f"{prob_loss:.1f}%", delta=f"{prob_loss:.1f}% risk", delta_color="inverse")
+            
+        st.markdown(f"""
+        ### 🔍 Key Interpretation:
+        * **Median Scenario (50% Probability)**: If the historical returns structure holds, your investment of **₹{initial_investment:,.2f}** is expected to grow to **₹{final_p50:,.2f}** in {horizon_years} years.
+        * **Optimistic Scenario (95th Percentile)**: In a strong bull market, the value could reach **₹{final_p95:,.2f}**.
+        * **Pessimistic Scenario (5th Percentile)**: In a severe market downturn, the value could drop to **₹{final_p5:,.2f}**.
+        * **Value at Risk (VaR)**: The 95% 5-year Value at Risk is **₹{max(0, initial_investment - final_p5):,.2f}** (maximum expected loss with 95% confidence).
+        """)
+
+# ==========================================
+# PAGE 6: Portfolio Optimization (B4)
+# ==========================================
+with tab6:
+    st.header("⚖️ Markowitz Portfolio Optimization & Efficient Frontier")
+    st.markdown("""
+    This optimizer calculates the **Modern Portfolio Theory (MPT) Efficient Frontier** for a set of selected funds.
+    It simulates 5,000 random weight combinations to identify the **Maximum Sharpe Ratio** portfolio and the **Minimum Volatility** portfolio.
+    """)
+    
+    # Fund Selector
+    available_funds = df_score['scheme_name'].tolist()
+    default_funds = available_funds[:5] if len(available_funds) >= 5 else available_funds
+    
+    selected_opt_funds = st.multiselect(
+        "Select exactly 5 funds for optimization:",
+        options=available_funds,
+        default=default_funds,
+        key="opt_funds_sel"
+    )
+    
+    if len(selected_opt_funds) != 5:
+        st.warning(f"Please select exactly 5 funds to run the optimizer. Currently selected: {len(selected_opt_funds)}")
+    else:
+        # Load NAV histories and compute daily returns
+        list_dfs = []
+        for fund_name in selected_opt_funds:
+            code = df_score[df_score['scheme_name'] == fund_name]['amfi_code'].values[0]
+            df_nav_f = pd.read_sql_query(f"""
+                SELECT date, nav FROM fact_nav WHERE amfi_code = {code} ORDER BY date
+            """, conn)
+            df_nav_f['date'] = pd.to_datetime(df_nav_f['date'])
+            df_nav_f = df_nav_f.sort_values('date')
+            
+            # Short name for column
+            short_name = fund_name.split(' - ')[0]
+            df_nav_f = df_nav_f.rename(columns={'nav': short_name})
+            list_dfs.append(df_nav_f[['date', short_name]])
+            
+        # Merge all dataframes on Date
+        df_merged_nav = list_dfs[0]
+        for df_next in list_dfs[1:]:
+            df_merged_nav = pd.merge(df_merged_nav, df_next, on='date', how='inner')
+            
+        if len(df_merged_nav) < 30:
+            st.warning("Insufficient overlapping date range for the selected funds to compute correlations.")
+        else:
+            df_merged_nav = df_merged_nav.sort_values('date')
+            fund_cols = [c for c in df_merged_nav.columns if c != 'date']
+            
+            # Compute daily returns
+            df_returns = df_merged_nav[fund_cols].pct_change().dropna()
+            
+            # Compute annualized mean returns and covariance matrix
+            mean_returns = df_returns.mean() * 252
+            cov_matrix = df_returns.cov() * 252
+            
+            # Risk free rate input
+            rf_rate = st.slider("Risk-Free Rate (Annualised)", min_value=0.0, max_value=0.10, value=0.06, step=0.005, format="%.3f")
+            
+            # Monte Carlo Simulation of Portfolios
+            num_portfolios = 5000
+            np.random.seed(42)
+            
+            results = np.zeros((3 + len(fund_cols), num_portfolios))
+            weights_record = []
+            
+            for i in range(num_portfolios):
+                weights = np.random.random(len(fund_cols))
+                weights /= np.sum(weights)
+                weights_record.append(weights)
+                
+                # Portfolio Return
+                p_ret = np.sum(weights * mean_returns)
+                
+                # Portfolio Volatility
+                p_vol = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
+                
+                # Portfolio Sharpe Ratio
+                p_sharpe = (p_ret - rf_rate) / p_vol
+                
+                results[0, i] = p_ret
+                results[1, i] = p_vol
+                results[2, i] = p_sharpe
+                for j in range(len(weights)):
+                    results[3 + j, i] = weights[j]
+                    
+            # Create a dataframe for results
+            df_results = pd.DataFrame(results.T, columns=['Return', 'Volatility', 'Sharpe'] + fund_cols)
+            
+            # Find key portfolios
+            max_sharpe_idx = df_results['Sharpe'].idxmax()
+            max_sharpe_portfolio = df_results.iloc[max_sharpe_idx]
+            
+            min_vol_idx = df_results['Volatility'].idxmin()
+            min_vol_portfolio = df_results.iloc[min_vol_idx]
+            
+            # Plots
+            # 1. Efficient Frontier Scatter Plot
+            fig_ef = px.scatter(
+                df_results, x='Volatility', y='Return', color='Sharpe',
+                color_continuous_scale='Viridis',
+                title="Efficient Frontier (5,000 Simulated Portfolios)",
+                labels={'Volatility': 'Annualised Volatility', 'Return': 'Annualised Return', 'Sharpe': 'Sharpe Ratio'},
+                hover_data=fund_cols
+            )
+            
+            # Formatting markers
+            fig_ef.update_traces(marker=dict(size=4, opacity=0.7))
+            
+            # Add Max Sharpe portfolio point
+            fig_ef.add_trace(go.Scatter(
+                x=[max_sharpe_portfolio['Volatility']],
+                y=[max_sharpe_portfolio['Return']],
+                mode='markers',
+                marker=dict(color='#e66f50', size=14, symbol='star', line=dict(color='black', width=2)),
+                name='Max Sharpe Ratio Portfolio'
+            ))
+            
+            # Add Min Volatility portfolio point
+            fig_ef.add_trace(go.Scatter(
+                x=[min_vol_portfolio['Volatility']],
+                y=[min_vol_portfolio['Return']],
+                mode='markers',
+                marker=dict(color='#0d8a72', size=14, symbol='star', line=dict(color='black', width=2)),
+                name='Minimum Variance Portfolio'
+            ))
+            
+            fig_ef.update_layout(
+                template="plotly_white",
+                legend=dict(orientation="h", y=-0.2, x=0.0),
+                coloraxis_colorbar=dict(title="Sharpe Ratio", yanchor="top", y=1, x=1.05)
+            )
+            st.plotly_chart(fig_ef, use_container_width=True)
+            
+            # Optimal Portfolios Details
+            ec1, ec2 = st.columns(2)
+            
+            with ec1:
+                st.subheader("🔥 Maximum Sharpe Ratio Portfolio")
+                st.markdown(f"**Annualised Return:** {max_sharpe_portfolio['Return'] * 100:.2f}%")
+                st.markdown(f"**Annualised Volatility (Risk):** {max_sharpe_portfolio['Volatility'] * 100:.2f}%")
+                st.markdown(f"**Sharpe Ratio:** {max_sharpe_portfolio['Sharpe']:.3f}")
+                
+                # Weights table
+                max_w_df = pd.DataFrame({
+                    'Asset': fund_cols,
+                    'Weight (%)': [max_sharpe_portfolio[col] * 100 for col in fund_cols]
+                })
+                max_w_df['Weight (%)'] = max_w_df['Weight (%)'].round(2)
+                st.dataframe(max_w_df, use_container_width=True)
+                
+            with ec2:
+                st.subheader("🛡️ Minimum Volatility Portfolio")
+                st.markdown(f"**Annualised Return:** {min_vol_portfolio['Return'] * 100:.2f}%")
+                st.markdown(f"**Annualised Volatility (Risk):** {min_vol_portfolio['Volatility'] * 100:.2f}%")
+                st.markdown(f"**Sharpe Ratio:** {min_vol_portfolio['Sharpe']:.3f}")
+                
+                # Weights table
+                min_w_df = pd.DataFrame({
+                    'Asset': fund_cols,
+                    'Weight (%)': [min_vol_portfolio[col] * 100 for col in fund_cols]
+                })
+                min_w_df['Weight (%)'] = min_w_df['Weight (%)'].round(2)
+                st.dataframe(min_w_df, use_container_width=True)
+                
+            # Weight Comparison Bar Chart
+            df_compare_w = pd.DataFrame({
+                'Fund': fund_cols * 2,
+                'Weight (%)': [max_sharpe_portfolio[col] * 100 for col in fund_cols] + [min_vol_portfolio[col] * 100 for col in fund_cols],
+                'Portfolio': ['Max Sharpe'] * len(fund_cols) + ['Min Volatility'] * len(fund_cols)
+            })
+            
+            fig_w_bar = px.bar(
+                df_compare_w, x='Fund', y='Weight (%)', color='Portfolio', barmode='group',
+                title="Optimal Asset Allocation Comparison",
+                color_discrete_sequence=['#e66f50', '#0d8a72']
+            )
+            fig_w_bar.update_layout(template="plotly_white")
+            st.plotly_chart(fig_w_bar, use_container_width=True)

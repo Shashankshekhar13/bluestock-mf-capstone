@@ -5,7 +5,11 @@ import argparse
 import pandas as pd
 
 def get_db_path():
-    db_path = 'bluestock_mf.db'
+    db_path = 'data/db/bluestock_mf.db'
+    if not os.path.exists(db_path):
+        db_path = '../data/db/bluestock_mf.db'
+    if not os.path.exists(db_path):
+        db_path = 'bluestock_mf.db'
     if not os.path.exists(db_path):
         db_path = '../bluestock_mf.db'
     return db_path
