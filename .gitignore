@@ -1,1 +1,6 @@
-
+data/db/bluestock_mf.db
+bluestock_mf.db
+.vscode/
+venv/
+scripts/generate_pdf.py
+scripts/generate_pptx.py

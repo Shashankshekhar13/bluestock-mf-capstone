@@ -5,6 +5,8 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+import subprocess
+import sys
 
 # Configure Streamlit page layout
 st.set_page_config(
@@ -18,8 +20,18 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 db_path = os.path.join(BASE_DIR, "data", "db", "bluestock_mf.db")
 
 if not os.path.exists(db_path):
-    st.error(f"Database not found at: {db_path}")
-    st.stop()
+    with st.spinner("⏳ First-time setup: building database from source data..."):
+        pipeline_script = os.path.join(BASE_DIR, "scripts", "etl_pipeline.py")
+        result = subprocess.run(
+            [sys.executable, pipeline_script],
+            capture_output=True, text=True
+        )
+        if result.returncode != 0:
+            st.error("Pipeline failed. Check logs.")
+            st.code(result.stderr)
+            st.stop()
+        st.success("✅ Database built successfully! Loading dashboard...")
+        st.rerun()
 
 @st.cache_resource
 def get_connection():
