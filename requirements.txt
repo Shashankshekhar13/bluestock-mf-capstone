@@ -7,3 +7,4 @@ sqlalchemy
 requests
 jupyter
 streamlit
+reportlab
