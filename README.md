@@ -234,18 +234,28 @@ The SQLite database (`data/db/bluestock_mf.db`) uses a **Star Schema** design fo
 
 ---
 
-## 🖥️ Streamlit Dashboard — 6 Tabs
+##  Streamlit Dashboard — 6 Tabs
+---
 
-Launch the dashboard with `streamlit run dashboard/app.py` and navigate to `http://localhost:8501`.
+> 🔗 **Live App:** [bluestock-mf-capstone.streamlit.app](https://bluestock-mf-capstone-cbvqipva2vrbtpyioxzjqn.streamlit.app)
 
-| Tab | Title | What It Shows |
-|---|---|---|
-| 1 | **Industry Overview** | AUM by fund house, market share treemap, category distribution, folio growth trends |
-| 2 | **Fund Performance** | Risk vs Return bubble chart (AUM = bubble size), CAGR heatmap, sortable fund scorecard |
-| 3 | **Investor Analytics** | Transaction demographics — KYC status, gender split, state-wise, income tier, age group |
-| 4 | **SIP & Market Trends** | Monthly SIP inflow trends, category-wise inflows, benchmark index comparison |
-| 5 | **Monte Carlo Simulation** | GBM simulation (1,000 paths, 5yr), 95% VaR calculation, probability of capital loss |
-| 6 | **Portfolio Optimization** | Markowitz Efficient Frontier (5,000 random portfolios), Max Sharpe & Min Volatility portfolios |
+### Tab 1 — Industry Overview
+![Industry Overview](screenshots/tab1_industry_overview.png)
+
+### Tab 2 — Fund Performance
+![Fund Performance](screenshots/tab2_fund_performance.png)
+
+### Tab 3 — Investor Analytics
+![Investor Analytics](screenshots/tab3_investor_analytics.png)
+
+### Tab 4 — SIP & Market Trends
+![SIP Trends](screenshots/tab4_sip_trends.png)
+
+### Tab 5 — Monte Carlo Simulation
+![Monte Carlo](screenshots/tab5_monte_carlo.png)
+
+### Tab 6 — Portfolio Optimization
+![Portfolio Optimization](screenshots/tab6_portfolio_optimization.png)
 
 ---
 
@@ -308,8 +318,6 @@ Where $R_p$ = portfolio return, $R_f$ = risk-free rate (default: 6%), $\sigma_p$
 | `scripts/live_nav_fetch.py` | Fetches daily NAV from `mfapi.in` API with exponential retry/backoff |
 | `scripts/recommender.py` | CLI tool — recommends top 3 funds by risk appetite (Low / Moderate / High) |
 | `scripts/email_report_generator.py` | Generates a responsive inline-CSS weekly HTML email newsletter |
-| `scripts/generate_pdf.py` | Programmatically builds a 16-page PDF board report |
-| `scripts/generate_pptx.py` | Programmatically builds a 12-slide PowerPoint pitch deck |
 
 ---
 
@@ -440,8 +448,6 @@ Executes the full library of analytical queries from `sql/queries.sql` against t
 - ✅ Risk scorecards (VaR, CVaR, Sharpe, Alpha/Beta)
 - ✅ Monte Carlo simulation & Markowitz portfolio optimizer
 - ✅ CLI fund recommender
-- ✅ 16-page PDF final report
-- ✅ 12-slide PowerPoint presentation
 - ✅ Weekly HTML email newsletter generator
 - ✅ Full data dictionary (11 tables, all columns)
 
