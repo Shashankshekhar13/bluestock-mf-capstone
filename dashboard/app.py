@@ -9,7 +9,7 @@ import streamlit as st
 # Configure Streamlit page layout
 st.set_page_config(
     page_title="Bluestock Mutual Fund Capstone Dashboard",
-    page_icon="",
+    page_icon=" ",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -30,7 +30,6 @@ def get_connection():
 
 conn = get_connection()
 
-# Standard AMC name mapping to shorten names in visual tables and charts
 amc_mapping = {
     'SBI Mutual Fund': 'SBI MF',
     'ICICI Prudential Mutual Fund': 'ICICI Pru MF',
@@ -91,8 +90,8 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     " Fund Performance", 
     " Investor Analytics", 
     " SIP & Market Trends",
-    " Monte Carlo Simulation (B3)",
-    " Portfolio Optimization (B4)"
+    " Monte Carlo Simulation",
+    " Portfolio Optimization "
 ])
 
 # ==========================================
@@ -494,7 +493,7 @@ with tab4:
 # PAGE 5: Monte Carlo Simulation (B3)
 # ==========================================
 with tab5:
-    st.header("📈 Monte Carlo NAV Growth Simulation")
+    st.header("Monte Carlo NAV Growth Simulation")
     st.markdown("""
     This simulator models the future NAV of a chosen mutual fund over a 5-year horizon (1,260 trading days) using **Geometric Brownian Motion (GBM)**.
     The simulation is based on the fund's historical daily return volatility and mean.
@@ -650,7 +649,7 @@ with tab5:
             st.metric("Probability of Loss", f"{prob_loss:.1f}%", delta=f"{prob_loss:.1f}% risk", delta_color="inverse")
             
         st.markdown(f"""
-        ### 🔍 Key Interpretation:
+        ###  Key Interpretation:
         * **Median Scenario (50% Probability)**: If the historical returns structure holds, your investment of **₹{initial_investment:,.2f}** is expected to grow to **₹{final_p50:,.2f}** in {horizon_years} years.
         * **Optimistic Scenario (95th Percentile)**: In a strong bull market, the value could reach **₹{final_p95:,.2f}**.
         * **Pessimistic Scenario (5th Percentile)**: In a severe market downturn, the value could drop to **₹{final_p5:,.2f}**.
@@ -661,7 +660,7 @@ with tab5:
 # PAGE 6: Portfolio Optimization (B4)
 # ==========================================
 with tab6:
-    st.header("⚖️ Markowitz Portfolio Optimization & Efficient Frontier")
+    st.header("Markowitz Portfolio Optimization & Efficient Frontier")
     st.markdown("""
     This optimizer calculates the **Modern Portfolio Theory (MPT) Efficient Frontier** for a set of selected funds.
     It simulates 5,000 random weight combinations to identify the **Maximum Sharpe Ratio** portfolio and the **Minimum Volatility** portfolio.
@@ -796,7 +795,7 @@ with tab6:
             ec1, ec2 = st.columns(2)
             
             with ec1:
-                st.subheader("🔥 Maximum Sharpe Ratio Portfolio")
+                st.subheader(" Maximum Sharpe Ratio Portfolio")
                 st.markdown(f"**Annualised Return:** {max_sharpe_portfolio['Return'] * 100:.2f}%")
                 st.markdown(f"**Annualised Volatility (Risk):** {max_sharpe_portfolio['Volatility'] * 100:.2f}%")
                 st.markdown(f"**Sharpe Ratio:** {max_sharpe_portfolio['Sharpe']:.3f}")
@@ -810,7 +809,7 @@ with tab6:
                 st.dataframe(max_w_df, use_container_width=True)
                 
             with ec2:
-                st.subheader("🛡️ Minimum Volatility Portfolio")
+                st.subheader(" Minimum Volatility Portfolio")
                 st.markdown(f"**Annualised Return:** {min_vol_portfolio['Return'] * 100:.2f}%")
                 st.markdown(f"**Annualised Volatility (Risk):** {min_vol_portfolio['Volatility'] * 100:.2f}%")
                 st.markdown(f"**Sharpe Ratio:** {min_vol_portfolio['Sharpe']:.3f}")
