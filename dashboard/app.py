@@ -14,38 +14,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Connect to database
-db_candidates = [
-    'data/db/bluestock_mf.db',
-    '../data/db/bluestock_mf.db',
-    'bluestock_mf.db',
-    '../bluestock_mf.db'
-]
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+db_path = os.path.join(BASE_DIR, "data", "db", "bluestock_mf.db")
 
-db_path = None
-for candidate in db_candidates:
-    if os.path.exists(candidate):
-        db_path = candidate
-        break
-
-if db_path is None:
-    st.error("### ❌ Database File Not Found")
-    st.markdown("""
-    The database file `bluestock_mf.db` could not be located in any of the expected paths.
-    
-    **Why is this happening?**
-    The database file is listed in `.gitignore` by default, so it was likely not pushed to your GitHub repository.
-    
-    **How to fix:**
-    Please run the following commands in your local terminal to force-add and push the database to GitHub:
-    ```powershell
-    git add -f data/db/bluestock_mf.db
-    git commit -m "Add database file to repository"
-    git push
-    ```
-    """)
+if not os.path.exists(db_path):
+    st.error(f"Database not found at: {db_path}")
     st.stop()
-
 
 @st.cache_resource
 def get_connection():
