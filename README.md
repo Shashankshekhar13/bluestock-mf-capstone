@@ -8,7 +8,7 @@
 ![Plotly](https://img.shields.io/badge/Plotly-Interactive%20Charts-3F4F75?style=flat&logo=plotly&logoColor=white)
 ![Jupyter](https://img.shields.io/badge/Jupyter-5%20Notebooks-F37626?style=flat&logo=jupyter&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Completed-2EA44F?style=flat)
-
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://bluestock-mf-capstone-cbvqipva2vrbtpyioxzjqn.streamlit.app)
 ---
 
 ## 📌 Table of Contents
