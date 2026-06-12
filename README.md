@@ -122,11 +122,11 @@ py scripts/generate_pptx.py
 
 ## 📊 Analytical Financial Models
 
-### 1. Monte Carlo NAV Simulation (B3)
+### 1. Monte Carlo NAV Simulation 
 Uses **Geometric Brownian Motion (GBM)** to forecast NAV trajectories over 5 years (1,260 business days):
 $$dS_t = \mu S_t dt + \sigma S_t dW_t$$
 
 By calculating historical returns, we extract drift ($\mu$) and asset volatility ($\sigma$) to project 1,000 independent pathways, computing **95% Value at Risk (VaR)** and **probability of capital loss**.
 
-### 2. Markowitz Portfolio Optimization (B4)
+### 2. Markowitz Portfolio Optimization 
 Implements **Modern Portfolio Theory (MPT)**. Simulates 5,000 random weight portfolios across 5 selected funds to trace the **Efficient Frontier**, isolating the **Maximum Sharpe Ratio** portfolio and the **Minimum Volatility** portfolio.
