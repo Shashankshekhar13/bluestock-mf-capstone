@@ -1,7 +1,5 @@
-# 📊 Bluestock Mutual Fund Capstone
+#  Bluestock Mutual Fund Capstone project
 
-> **Data Analytics Internship — Bluestock Fintech**
-> An end-to-end data engineering and financial analytics platform that transforms raw mutual fund datasets into structured databases, interactive dashboards, and investment intelligence.
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat&logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?style=flat&logo=streamlit&logoColor=white)
@@ -28,11 +26,10 @@
 11. [Tech Stack](#-tech-stack)
 12. [Installation & Setup](#-installation--setup)
 13. [Usage Guide](#-usage-guide)
-14. [Internship Context](#-internship-context)
 
 ---
 
-## 🔍 Project Overview
+##  Project Overview
 
 This capstone project delivers a **production-grade mutual fund analytics platform** built during a data analytics internship at **Bluestock Fintech**. The system covers the full data engineering lifecycle — from raw CSV ingestion to a live interactive dashboard — across **40 mutual fund schemes** from India's top AMCs.
 
@@ -40,7 +37,7 @@ The platform provides portfolio risk intelligence, fund performance benchmarking
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
 - **Automated ETL Pipeline** — ingests, cleans, and loads 10 raw CSV datasets into a structured SQLite database with a single command
 - **Star Schema Data Warehouse** — 2 dimension tables + 9 fact tables with B-Tree indexing for fast query performance
@@ -53,7 +50,7 @@ The platform provides portfolio risk intelligence, fund performance benchmarking
 
 ---
 
-## 📈 Project Stats
+##  Project Stats
 
 | Metric | Value |
 |---|---|
